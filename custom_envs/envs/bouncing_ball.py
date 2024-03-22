@@ -34,7 +34,7 @@ class BouncingBallEnv(gym.Env):
     """
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
     
-    def __init__(self, render_mode=None, size=2, ball_diameter_ratio = 0.02, apply_action=True, log=False):
+    def __init__(self, render_mode=None, size=2, ball_diameter_ratio = 0.01, apply_action=True, log=False):
         """
         Initialize the BouncingBallEnv.
 
@@ -75,13 +75,13 @@ class BouncingBallEnv(gym.Env):
 
         
         self.log = log
-        self.keys_to_action = {
-            # Direction vectors represented as [x, y]
-            "w": [0, -1],  # Up
-            "a": [-1, 0],  # Left
-            "s": [0, 1],   # Down
-            "d": [1, 0],   # Right
-        }
+        # self.keys_to_action = {
+        #     # Direction vectors represented as [x, y]
+        #     "w": [0, -1],  # Up
+        #     "a": [-1, 0],  # Left
+        #     "s": [0, 1],   # Down
+        #     "d": [1, 0],   # Right
+        # }
 
         self.render_mode = render_mode
 
