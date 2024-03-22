@@ -166,7 +166,7 @@ class GridWorldEnv(gym.Env):
         
         return observation, reward, done, info
     
-    def render(self):
+    def render(self, mode="human"):
         if self.render_mode == "rgb_array":
             return self._render_frame()
 
