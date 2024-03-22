@@ -13,7 +13,9 @@ from gym.utils.play import play, PlayPlot
 # plotter = PlayPlot(callback, 150, ["action"])   
 # env = gym.make('ALE/VideoPinball-v5', render_mode="human")
 
-env = gym.make('custom_envs/GridWorld-v0', size=7, render_mode="human")
+# env = gym.make('custom_envs/GridWorld-v0', size=7, render_mode="human")
+env = gym.make('custom_envs/BouncingBall-v0', size=4, render_mode="human")
+
 # env = gym.make('gym_examples/GridWorld-v0', render_mode="rgb_array")
 
 # play(env, callback=plotter.callback)

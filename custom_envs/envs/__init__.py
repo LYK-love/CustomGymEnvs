@@ -1,4 +1,4 @@
-from gym_examples.envs.grid_world import GridWorldEnv
-from gym_examples.envs.bouncing_ball import BouncingBallEnv 
+from custom_envs.envs.grid_world import GridWorldEnv
+from custom_envs.envs.bouncing_ball import BouncingBallEnv 
  
 

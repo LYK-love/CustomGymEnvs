@@ -116,6 +116,7 @@ class BouncingBallEnv(gym.Env):
             # The ball moves back 1 unit in the inverse direction after collision
             self.state[:2] = np.clip(self.state[:2] + inverse_direction, 0, self.size - 1)
             reward = 1  # Assign reward for hitting and bouncing off the wall
+            print(f"Collision! ======> reward: {reward}")
         else:
             # No collision: Update position normally
             self.state[:2] = np.clip(next_position, 0, self.size - 1)

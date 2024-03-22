@@ -1,4 +1,4 @@
 Install:
 ```
-pip install -e custom_envs
+pip install -e .
 ```
