@@ -190,7 +190,12 @@ class BouncingBallEnv(gym.Env):
         # Update the observation with the current state
         observation = self.state
 
-        info = {"message": "Ball has stopped" if done else "In motion"}
+        info = {
+            "message": "Ball has stopped" if done else "In motion",
+            "Velocity": {self.state[2:]}, 
+            "Position": {self.state[:2]}, 
+            "Energy": {np.linalg.norm(self.state[2:])}
+            }
 
         if self.render_mode == "human":
             self._render_frame()
@@ -198,7 +203,7 @@ class BouncingBallEnv(gym.Env):
         if self.log:
             if collision:
                 print(f"Collision detected! =====> reward: {reward}")
-            print(f"Velocity: {self.state[2:]}, Position: {self.state[:2]}")
+            print(f"Velocity: {self.state[2:]}, Position: {self.state[:2]}, Energy: {np.linalg.norm(self.state[2:])}")
         return observation, reward, done, info
 
     def old_step(self, action):
