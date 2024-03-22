@@ -7,14 +7,15 @@ from gym.utils.env_checker import check_env
 from gym.utils.play import play, PlayPlot
 # from gym.envs.box2d import CarRacing
 
-# def callback(obs_t, obs_tp1, action, rew, terminated, truncated, info):
-#     return [action,]
+def callback(obs_t, obs_tp1, action, rew, terminated, truncated, info):
+    return [action,]
 
-# plotter = PlayPlot(callback, 150, ["action"])   
+plotter = PlayPlot(callback, 150, ["action"])   
 # env = gym.make('ALE/VideoPinball-v5', render_mode="human")
 
 # env = gym.make('custom_envs/GridWorld-v0', size=7, render_mode="human")
 env = gym.make('custom_envs/BouncingBall-v0', size=2, ball_diameter_ratio=0.02, render_mode="human", apply_action=False, log=True)
+play(env, callback=plotter.callback)
 
 # env = gym.make('gym_examples/GridWorld-v0', render_mode="rgb_array")
 
