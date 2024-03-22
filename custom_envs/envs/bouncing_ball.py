@@ -59,7 +59,7 @@ class BouncingBallEnv(gym.Env):
         self.min_velocity = 0.01  # Threshold for considering the velocity to be effectively zero
         
         self.wall_thickness = 10 # Fixed thickness for walls
-        self.ball_diameter = self.window_size / 30  # Adjust ball size as needed
+        self.ball_diameter = self.window_size / 10  # Adjust ball size as needed
         
         self.log = log
         self.keys_to_action = {
@@ -163,7 +163,7 @@ class BouncingBallEnv(gym.Env):
             collision = True
 
         if collision:
-            reward = 1  # Reward for hitting a wall
+            reward = 10  # Reward for hitting a wall
 
         # Apply velocity updates to calculate the new position
         # Here we assume each step has unit time duration. So s = v * t.
@@ -247,7 +247,7 @@ class BouncingBallEnv(gym.Env):
         canvas.fill((255, 255, 255))  # White background
 
         # Calculate the size of the ball and wall thickness
-        ball_diameter = self.window_size / 30  # Adjust ball size as needed
+        ball_diameter = self.ball_diameter  # Adjust ball size as needed
         wall_thickness = self.wall_thickness  # Fixed thickness for walls
 
         # Draw walls as thick lines around the perimeter
