@@ -58,8 +58,13 @@ class BouncingBallEnv(gym.Env):
         
         self.min_velocity = 0.01  # Threshold for considering the velocity to be effectively zero
         
-        self.wall_thickness = 10 # Fixed thickness for walls
-        self.ball_diameter = self.window_size / 10  # Adjust ball size as needed
+        # Example of adjusting units to the world size
+        self.wall_thickness_ratio = 0.02  # Wall thickness as a proportion of world size
+        self.ball_diameter_ratio = 0.05  # Ball diameter as a proportion of world size
+
+        self.wall_thickness_world = self.size * self.wall_thickness_ratio
+        self.ball_radius_world = (self.size * self.ball_diameter_ratio) / 2
+
         
         self.log = log
         self.keys_to_action = {
@@ -153,13 +158,19 @@ class BouncingBallEnv(gym.Env):
         reward = 0
         done = False
 
-        # Check for wall collisions
+        # Adjust for ball's radius in collision detection
+        left_bound = 0 + self.ball_radius_world
+        right_bound = self.size - 1 - self.ball_radius_world
+        top_bound = 0 + self.ball_radius_world
+        bottom_bound = self.size - 1 - self.ball_radius_world
+
+        # Check collisions with adjustments for ball radius
         collision = False
-        if next_position[0] <= 0 or next_position[0] >= self.size - 1:
-            self.state[2] = -self.state[2] * energy_loss_factor  # Reverse and reduce X velocity
+        if next_position[0] <= left_bound or next_position[0] >= right_bound:
+            self.state[2] = -self.state[2] * energy_loss_factor  # Reverse X velocity
             collision = True
-        if next_position[1] <= 0 or next_position[1] >= self.size - 1:
-            self.state[3] = -self.state[3] * energy_loss_factor  # Reverse and reduce Y velocity
+        if next_position[1] <= top_bound or next_position[1] >= bottom_bound:
+            self.state[3] = -self.state[3] * energy_loss_factor  # Reverse Y velocity
             collision = True
 
         if collision:
@@ -246,23 +257,29 @@ class BouncingBallEnv(gym.Env):
         canvas = pygame.Surface((self.window_size, self.window_size))
         canvas.fill((255, 255, 255))  # White background
 
-        # Calculate the size of the ball and wall thickness
-        ball_diameter = self.ball_diameter  # Adjust ball size as needed
-        wall_thickness = self.wall_thickness  # Fixed thickness for walls
+        # Assuming you've calculated these ratios based on the environment's scale
+        ball_diameter_ratio = self.ball_diameter_ratio  # The ball's diameter as a proportion of the environment size
+        wall_thickness_ratio = self.wall_thickness_ratio  # The wall's thickness as a proportion of the environment size
 
-        # Draw walls as thick lines around the perimeter
+        # Convert these ratios to pixel dimensions for rendering
+        ball_diameter_pixels = self.window_size * ball_diameter_ratio
+        wall_thickness_pixels = self.window_size * wall_thickness_ratio
+
+        # Draw walls as thick lines around the perimeter using the pixel dimensions
         wall_color = (0, 0, 0)  # Black for walls
-        pygame.draw.line(canvas, wall_color, (0, 0), (self.window_size, 0), wall_thickness)  # Top wall
-        pygame.draw.line(canvas, wall_color, (0, self.window_size), (self.window_size, self.window_size), wall_thickness)  # Bottom wall
-        pygame.draw.line(canvas, wall_color, (0, 0), (0, self.window_size), wall_thickness)  # Left wall
-        pygame.draw.line(canvas, wall_color, (self.window_size, 0), (self.window_size, self.window_size), wall_thickness)  # Right wall
+        pygame.draw.line(canvas, wall_color, (0, 0), (self.window_size, 0), int(wall_thickness_pixels))  # Top wall
+        pygame.draw.line(canvas, wall_color, (0, self.window_size), (self.window_size, self.window_size), int(wall_thickness_pixels))  # Bottom wall
+        pygame.draw.line(canvas, wall_color, (0, 0), (0, self.window_size), int(wall_thickness_pixels))  # Left wall
+        pygame.draw.line(canvas, wall_color, (self.window_size, 0), (self.window_size, self.window_size), int(wall_thickness_pixels))  # Right wall
 
-        # Now we draw the agent (ball)
+        # Draw the agent (ball)
         agent_location = self.state[:2]
         agent_color = (0, 0, 255)  # Blue for the agent
-        agent_center = (int(agent_location[0] * self.window_size / self.size), 
-                        int(agent_location[1] * self.window_size / self.size))  # Convert agent location to pixel coords
-        pygame.draw.circle(canvas, agent_color, agent_center, ball_diameter // 2)
+        # Convert agent location to pixel coordinates, adjusting for ball radius to keep it within bounds
+        agent_center_x = (agent_location[0] * self.window_size / self.size)
+        agent_center_y = (agent_location[1] * self.window_size / self.size)
+        agent_center = (int(agent_center_x), int(agent_center_y))
+        pygame.draw.circle(canvas, agent_color, agent_center, int(ball_diameter_pixels // 2))
         
         if self.render_mode == "human":
             # The following line copies our drawings from `canvas` to the visible window
