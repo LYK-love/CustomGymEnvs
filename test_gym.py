@@ -14,7 +14,7 @@ from gym.utils.play import play, PlayPlot
 # env = gym.make('ALE/VideoPinball-v5', render_mode="human")
 
 # env = gym.make('custom_envs/GridWorld-v0', size=7, render_mode="human")
-env = gym.make('custom_envs/BouncingBall-v0', size=4, render_mode="human", apply_action=False, log=True)
+env = gym.make('custom_envs/BouncingBall-v0', size=4, ball_diameter_ratio=0.05, render_mode="human", apply_action=False, log=True)
 
 # env = gym.make('gym_examples/GridWorld-v0', render_mode="rgb_array")
 

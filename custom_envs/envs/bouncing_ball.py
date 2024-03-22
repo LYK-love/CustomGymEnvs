@@ -33,7 +33,7 @@ class BouncingBallEnv(gym.Env):
     """
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
     
-    def __init__(self, render_mode=None, size=40, apply_action=True, log=False):
+    def __init__(self, render_mode=None, size=40, ball_diameter_ratio = 0.05, apply_action=True, log=False):
         '''
         
         '''
@@ -60,7 +60,7 @@ class BouncingBallEnv(gym.Env):
         
         # Example of adjusting units to the world size
         self.wall_thickness_ratio = 0.02  # Wall thickness as a proportion of world size
-        self.ball_diameter_ratio = 0.05  # Ball diameter as a proportion of world size
+        self.ball_diameter_ratio = ball_diameter_ratio  # Ball diameter as a proportion of world size
 
         self.wall_thickness_world = self.size * self.wall_thickness_ratio
         self.ball_radius_world = (self.size * self.ball_diameter_ratio) / 2
