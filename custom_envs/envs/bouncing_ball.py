@@ -22,6 +22,11 @@ class BouncingBallEnv(gym.Env):
         # Initialize state (position of the ball)
         self.state = None
         
+        self.energy_loss_factor = 0.9  # Control how much energy is lost on collision
+        # self.velocity_change_factor = 0.1  # Control how much the action affects the velocity
+        self.velocity_change_factor = 0  # Control how much the action affects the velocity
+        
+        self.min_velocity = 0.01  # Threshold for considering the velocity to be effectively zero
         
         self.wall_thickness = 10 # Fixed thickness for walls
         self.ball_diameter = self.window_size / 30  # Adjust ball size as needed
@@ -79,9 +84,10 @@ class BouncingBallEnv(gym.Env):
         initial_x = self.np_random.uniform(low=lower_bound, high=upper_bound)
         initial_y = self.np_random.uniform(low=lower_bound, high=upper_bound)
         
-        # Initialize the ball's velocity to 0 (if your model includes velocity)
-        initial_velocity_x = 0
-        initial_velocity_y = 0
+        # Randomly initialize the ball's velocity
+        
+        initial_velocity_x = self.np_random.uniform(low=-1.0, high=1.0)
+        initial_velocity_y = self.np_random.uniform(low=-1.0, high=1.0)
 
         
         # Set the initial state
@@ -96,6 +102,63 @@ class BouncingBallEnv(gym.Env):
 
 
     def step(self, action):
+        ## Constants for modifications
+        velocity_change_factor = self.velocity_change_factor  # Control how much the action affects the velocity
+        energy_loss_factor = self.energy_loss_factor  # Control how much energy is lost on collision
+        min_velocity = self.min_velocity  # Threshold for considering the velocity to be effectively zero
+        
+        # Normalize the action to ensure it's a unit vector
+        action_direction = action / np.linalg.norm(action)
+        
+        # Adjust the ball's velocity based on the action
+        self.state[2] += action_direction[0] * velocity_change_factor
+        self.state[3] += action_direction[1] * velocity_change_factor
+        
+        
+        # Update the ball's position based on its velocity
+        next_position = self.state[:2] + self.state[2:]
+
+        # Initialize reward and done flag
+        reward = 0
+        done = False
+
+        # Check for wall collisions
+        collision = False
+        if next_position[0] <= 0 or next_position[0] >= self.size - 1:
+            self.state[2] = -self.state[2] * energy_loss_factor  # Reverse and reduce X velocity
+            collision = True
+        if next_position[1] <= 0 or next_position[1] >= self.size - 1:
+            self.state[3] = -self.state[3] * energy_loss_factor  # Reverse and reduce Y velocity
+            collision = True
+
+        if collision:
+            reward = 1  # Reward for hitting a wall
+
+        # Apply velocity updates to calculate the new position
+        # Here we assume each step has unit time duration. So s = v * t.
+        self.state[:2] += self.state[2:]
+
+        # Ensure the ball's position is within the environment bounds
+        self.state[:2] = np.clip(self.state[:2], 0, self.size - 1)
+
+        # Check if the ball's velocity is effectively zero
+        if np.linalg.norm(self.state[2:]) < min_velocity:
+            done = True  # End the episode if the ball has stopped moving
+        
+        # Update the observation with the current state
+        observation = self.state
+
+        info = {"message": "Ball has stopped" if done else "In motion"}
+
+        if self.render_mode == "human":
+            self._render_frame()
+
+        return observation, reward, done, info
+
+    def old_step(self, action):
+        '''
+        Use action. Not use velocity.
+        '''
         # The `step()` method must return four values: obs, reward, done, info
         
         # Normalize the action to get the direction vector with magnitude 1
