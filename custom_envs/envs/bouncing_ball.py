@@ -17,6 +17,7 @@ class BouncingBallEnv(gym.Env):
     Parameters:
     - render_mode (str): The rendering mode for the environment. Can be "human" or "rgb_array".
     - size (int): The size of the square grid.
+    - ball_diameter_ratio (float): The ratio of the ball's diameter to the size of the grid.
     - apply_action (bool): Whether to apply the action to the ball's velocity.
     - log (bool): Whether to log additional information during the environment's execution.
 
@@ -34,9 +35,16 @@ class BouncingBallEnv(gym.Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
     
     def __init__(self, render_mode=None, size=40, ball_diameter_ratio = 0.05, apply_action=True, log=False):
-        '''
-        
-        '''
+        """
+        Initialize the BouncingBallEnv.
+
+        Args:
+        - render_mode (str): The rendering mode for the environment. Can be "human" or "rgb_array".
+        - size (int): The size of the square grid.
+        - ball_diameter_ratio (float): The ratio of the ball's diameter to the size of the grid.
+        - apply_action (bool): Whether to apply the action to the ball's velocity.
+        - log (bool): Whether to log additional information during the environment's execution.
+        """
         self.size = size  # The size of the square grid
         self.window_size = 512  # The size of the PyGame window
 
@@ -88,6 +96,12 @@ class BouncingBallEnv(gym.Env):
         self.clock = None
     
     def _get_obs(self):
+        """
+        Get the current observation of the environment.
+
+        Returns:
+        - obs (np.ndarray): The current observation of the environment as an RGB array.
+        """
         # Temporarily set render_mode to 'rgb_array' for this operation, if necessary
         original_render_mode = self.render_mode
         self.render_mode = 'rgb_array'
@@ -101,13 +115,32 @@ class BouncingBallEnv(gym.Env):
         return obs
     
     def _get_info(self):
+        """
+        Get additional information about the environment.
+
+        Returns:
+        - info (dict): Additional information about the environment.
+        """
         return {
             
         }
+    
     def get_keys_to_action(self):
+        """
+        Get the mapping of keys to actions.
+
+        Returns:
+        - keys_to_action (dict): The mapping of keys to actions.
+        """
         return self.keys_to_action
     
     def reset(self):
+        """
+        Reset the environment to its initial state and return the initial observation.
+
+        Returns:
+        - observation (np.ndarray): The initial observation of the environment.
+        """
         # Define the safe area for ball initialization, considering wall thickness
         wall_thickness_ratio = 10 / self.window_size  # Assuming '10' is the wall thickness in pixels
         safe_margin = self.size * wall_thickness_ratio  # Convert wall thickness to environment scale
@@ -138,6 +171,18 @@ class BouncingBallEnv(gym.Env):
 
 
     def step(self, action):
+        """
+        Take a step in the environment based on the given action.
+
+        Args:
+        - action (np.ndarray): The action to take in the environment.
+
+        Returns:
+        - observation (np.ndarray): The new observation of the environment.
+        - reward (float): The reward for the current step.
+        - done (bool): Whether the episode is done or not.
+        - info (dict): Additional information about the environment.
+        """
         ## Constants for modifications
         velocity_change_factor = self.velocity_change_factor  # Control how much the action affects the velocity
         energy_loss_factor = self.energy_loss_factor  # Control how much energy is lost on collision
