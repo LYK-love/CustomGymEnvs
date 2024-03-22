@@ -7,9 +7,36 @@ from gym import spaces
 from gym.utils import seeding
 
 class BouncingBallEnv(gym.Env):
-    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
+    """
+    Custom Gym environment for a bouncing ball.
 
-    def __init__(self, render_mode=None, size=40):
+    The goal of this environment is to control the movement of a ball within a square grid.
+    The ball can move in any direction and bounces off the walls of the grid.
+    The agent receives a reward when the ball hits a wall and stops when the ball comes to a rest.
+
+    Parameters:
+    - render_mode (str): The rendering mode for the environment. Can be "human" or "rgb_array".
+    - size (int): The size of the square grid.
+    - apply_action (bool): Whether to apply the action to the ball's velocity.
+    - log (bool): Whether to log additional information during the environment's execution.
+
+    Attributes:
+    - metadata (dict): Metadata about the environment, including available render modes and render FPS.
+    - observation_space (gym.Space): The observation space of the environment.
+    - action_space (gym.Space): The action space of the environment.
+    - state (np.ndarray): The current state of the environment, including the ball's position and velocity.
+
+    Methods:
+    - reset(): Resets the environment to its initial state and returns the initial observation.
+    - step(action): Takes a step in the environment based on the given action and returns the new observation, reward, done flag, and additional info.
+    - render(): Renders the current state of the environment.
+    """
+    metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
+    
+    def __init__(self, render_mode=None, size=40, apply_action=True, log=False):
+        '''
+        
+        '''
         self.size = size  # The size of the square grid
         self.window_size = 512  # The size of the PyGame window
 
@@ -23,14 +50,18 @@ class BouncingBallEnv(gym.Env):
         self.state = None
         
         self.energy_loss_factor = 0.9  # Control how much energy is lost on collision
-        # self.velocity_change_factor = 0.1  # Control how much the action affects the velocity
-        self.velocity_change_factor = 0  # Control how much the action affects the velocity
+
+        if apply_action:
+            self.velocity_change_factor = 0.1 # Control how much the action affects the velocity
+        else:
+            self.velocity_change_factor = 0 
         
         self.min_velocity = 0.01  # Threshold for considering the velocity to be effectively zero
         
         self.wall_thickness = 10 # Fixed thickness for walls
         self.ball_diameter = self.window_size / 30  # Adjust ball size as needed
         
+        self.log = log
         self.keys_to_action = {
             # Direction vectors represented as [x, y]
             "w": [0, -1],  # Up
@@ -152,7 +183,11 @@ class BouncingBallEnv(gym.Env):
 
         if self.render_mode == "human":
             self._render_frame()
-
+            
+        if self.log:
+            if collision:
+                print(f"Collision detected! =====> reward: {reward}")
+            print(f"Velocity: {self.state[2:]}, Position: {self.state[:2]}")
         return observation, reward, done, info
 
     def old_step(self, action):
