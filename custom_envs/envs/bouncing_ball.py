@@ -192,8 +192,6 @@ class BouncingBallEnv(gym.Env):
 
         info = {
             "message": "Ball has stopped" if done else "In motion",
-            "Velocity": {self.state[2:]}, 
-            "Position": {self.state[:2]}, 
             "Energy": {np.linalg.norm(self.state[2:])}
             }
 
