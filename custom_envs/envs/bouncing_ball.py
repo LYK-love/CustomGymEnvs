@@ -162,6 +162,7 @@ class BouncingBallEnv(gym.Env):
     def step(self, action):
         """
         Take a step in the environment based on the given action.
+        
 
         Args:
         - action (np.ndarray): The action to take in the environment.
@@ -180,34 +181,37 @@ class BouncingBallEnv(gym.Env):
         self.state[3] += action_direction[1] * self.velocity_change_factor
         
         
-        # Update the ball's position based on its velocity
-        next_position = self.state[:2] + self.state[2:]
+        # Apply old velocity to calculate the new position
+        # Here we assume each step has unit time duration. So s = v * t.
+        self.state[:2] += self.state[2:]
+        next_position = self.state[:2] # The idea next position (unclipped), used for collision detection
+        # Ensure the ball's position is within the environment bounds
+        self.state[:2] = np.clip(self.state[:2], self.left_bound, self.top_bound)
+        
+        next_velocity = self.state[2:]
 
         # Initialize reward and done flag
         reward = 0
         done = False
 
         
-
         # Check collisions with adjustments for ball radius
         collision = False
         if next_position[0] <= self.left_bound or next_position[0] >= self.right_bound:
-            self.state[2] = -self.state[2] * self.energy_loss_factor  # Reverse X velocity
+            next_velocity[0] = -next_velocity[0] * self.energy_loss_factor  # Reverse X velocity
             collision = True
         if next_position[1] <= self.bottom_bound or next_position[1] >= self.top_bound:
-            self.state[3] = -self.state[3] * self.energy_loss_factor  # Reverse Y velocity
+            next_velocity[1] = -next_velocity[1] * self.energy_loss_factor  # Reverse Y velocity
             collision = True
 
         if collision:
             reward = 10  # Reward for hitting a wall
 
-        # Apply velocity updates to calculate the new position
-        # Here we assume each step has unit time duration. So s = v * t.
-        self.state[:2] += self.state[2:]
-
-        # Ensure the ball's position is within the environment bounds
-        self.state[:2] = np.clip(self.state[:2], 0, self.size)
-
+        # Update the velocity
+        self.state[2] = next_velocity[0]
+        self.state[3] = next_velocity[1]
+        
+        
         # Check if the ball's velocity is effectively zero
         if np.linalg.norm(self.state[2:]) < self.min_velocity:
             done = True  # End the episode if the ball has stopped moving
