@@ -181,7 +181,7 @@ class BouncingBallEnv(gym.Env):
         self.state[3] += action_direction[1] * self.velocity_change_factor
         
         print(f"bottom bound: {self.bottom_bound}, left bound: {self.left_bound}, top bound: {self.top_bound}, right bound: {self.right_bound}")
-        print(f"Current velocity: {self.state[2:]} \n Current position: {self.state[:2]} \n Current energy: {np.linalg.norm(self.state[2:])}")
+        print(f"Current velocity: {self.state[2:]} \nCurrent position: {self.state[:2]} \nCurrent energy: {np.linalg.norm(self.state[2:])}")
         
         
         # Apply old velocity to calculate the new position
@@ -284,8 +284,8 @@ class BouncingBallEnv(gym.Env):
         print("Agent center: ", agent_center)
         
         
-        # print("Radius (size): ", radius)
-        # print("Agent center (size): ", (agent_location[0], agent_location[1]))
+        print("Radius (size): ", self.ball_radius_ratio * self.size)
+        print("Agent center (size): ", (agent_location[0], agent_location[1]))
         print("==========================")
         
         
