@@ -266,13 +266,13 @@ class BouncingBallEnv(gym.Env):
         wall_color = (0, 0, 0)
 
         # Top wall
-        pygame.draw.rect(self.window, wall_color, pygame.Rect(0, 0, self.window_size, wall_thickness_pixels))
+        pygame.draw.rect(canvas, wall_color, pygame.Rect(0, 0, self.window_size, wall_thickness_pixels))
         # Bottom wall
-        pygame.draw.rect(self.window, wall_color, pygame.Rect(0, self.window_size - wall_thickness_pixels, self.window_size, wall_thickness_pixels))
+        pygame.draw.rect(canvas, wall_color, pygame.Rect(0, self.window_size - wall_thickness_pixels, self.window_size, wall_thickness_pixels))
         # Left wall
-        pygame.draw.rect(self.window, wall_color, pygame.Rect(0, 0, wall_thickness_pixels, self.window_size))
+        pygame.draw.rect(canvas, wall_color, pygame.Rect(0, 0, wall_thickness_pixels, self.window_size))
         # Right wall
-        pygame.draw.rect(self.window, wall_color, pygame.Rect(self.window_size - wall_thickness_pixels, 0, wall_thickness_pixels, self.window_size))
+        pygame.draw.rect(canvas, wall_color, pygame.Rect(self.window_size - wall_thickness_pixels, 0, wall_thickness_pixels, self.window_size))
 
         # Draw the agent (ball)
         agent_location = self.state[:2]

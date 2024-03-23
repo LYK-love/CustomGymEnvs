@@ -7,7 +7,7 @@ from gym.utils.env_checker import check_env
 from gym.utils.play import play, PlayPlot
 # from gym.envs.box2d import CarRacing
 
-env = gym.make('custom_envs/BouncingBall-v0', render_mode="human", size=2,  velocity_scale = 1.0, ball_diameter_ratio = 0.1, wall_thickness_ratio = 0.1, apply_action=False, log=True)
+env = gym.make('custom_envs/BouncingBall-v0', render_mode="human", size=2,  velocity_scale = 1.0, ball_radius_ratio = 0.1, wall_thickness_ratio = 0.01, apply_action=False, log=True)
 
 
 # env = gym.make('custom_envs/BouncingBall-v0', size=2, ball_diameter_ratio=0.02, render_mode="rgb_array", apply_action=False, log=True)
