@@ -142,12 +142,12 @@ class BouncingBallEnv(gym.Env):
         - observation (np.ndarray): The initial observation of the environment.
         """
         # Define the safe area for ball initialization, considering wall thickness
-        wall_thickness_ratio = 10 / self.window_size  # Assuming '10' is the wall thickness in pixels
+        wall_thickness_ratio = 0.01
         safe_margin = self.size * wall_thickness_ratio  # Convert wall thickness to environment scale
         
         # Define the safe bounds for ball initialization
         lower_bound = 0 + safe_margin
-        upper_bound = self.size - 1 - safe_margin
+        upper_bound = self.size - safe_margin
 
         # Randomly initialize the ball's position within the safe bounds
         initial_x = self.np_random.uniform(low=lower_bound, high=upper_bound)
