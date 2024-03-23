@@ -34,7 +34,7 @@ class BouncingBallEnv(gym.Env):
     """
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
     
-    def __init__(self, render_mode=None, size=2, velocity_scale = 1.0, ball_diameter_ratio = 0.01, wall_thickness_ratio = 0.01, apply_action=True, log=False):
+    def __init__(self, render_mode=None, size=2, velocity_scale = 1.0, ball_diameter_ratio = 0.01, wall_thickness_ratio = 0.01, energy_loss_factor=0.9, apply_action=True, log=False):
         """
         Initialize the BouncingBallEnv.
 
@@ -57,7 +57,7 @@ class BouncingBallEnv(gym.Env):
         # Initialize state (position of the ball)
         self.state = None
         
-        self.energy_loss_factor = 0.9  # Control how much energy is lost on collision
+        self.energy_loss_factor = energy_loss_factor  # Control how much energy is lost on collision
 
         if apply_action:
             self.velocity_change_factor = 0.1 # Control how much the action affects the velocity
@@ -180,12 +180,18 @@ class BouncingBallEnv(gym.Env):
         self.state[2] += action_direction[0] * self.velocity_change_factor
         self.state[3] += action_direction[1] * self.velocity_change_factor
         
+        print(f"bottom bound: {self.bottom_bound}, left bound: {self.left_bound}, top bound: {self.top_bound}, right bound: {self.right_bound}")
+        
+        current_position = self.state[:2]
+        print(f"current_position: {current_position}")
+        
         
         # Apply old velocity to calculate the new position
         # Here we assume each step has unit time duration. So s = v * t.
         self.state[:2] += self.state[2:]
         next_position = self.state[:2] # The idea next position (unclipped), used for collision detection
         print(f"next_position: {next_position}")
+        
         # Ensure the ball's position is within the environment bounds
         self.state[:2] = np.clip(self.state[:2], self.left_bound, self.top_bound)
         
@@ -207,6 +213,9 @@ class BouncingBallEnv(gym.Env):
 
         if collision:
             reward = 10  # Reward for hitting a wall
+            print(f"Collision detected! =====> reward: {reward}")
+        else:
+            print("No collision detected")
 
         # Update the velocity
         self.state[2] = next_velocity[0]
@@ -229,9 +238,8 @@ class BouncingBallEnv(gym.Env):
             self._render_frame()
             
         if self.log:
-            if collision:
-                print(f"Collision detected! =====> reward: {reward}")
-            print(f"bottom bound: {self.bottom_bound}, left bound: {self.left_bound}, top bound: {self.top_bound}, right bound: {self.right_bound}")
+            # if collision:
+                # print(f"Collision detected! =====> reward: {reward}")
             print(f"Velocity: {self.state[2:]}, Position: {self.state[:2]}, Energy: {np.linalg.norm(self.state[2:])}")
         return observation, reward, done, info
 
