@@ -34,7 +34,7 @@ class BouncingBallEnv(gym.Env):
     """
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
     
-    def __init__(self, render_mode=None, size=2, velocity_scale = 1.0, ball_diameter_ratio = 0.01, wall_thickness_ratio = 0.01, energy_loss_factor=0.9, apply_action=True, log=False):
+    def __init__(self, render_mode=None, size=2, velocity_scale = 1.0, ball_radius_ratio = 0.005, wall_thickness_ratio = 0.01, energy_loss_factor=0.9, apply_action=True, log=False):
         """
         Initialize the BouncingBallEnv.
 
@@ -68,9 +68,9 @@ class BouncingBallEnv(gym.Env):
         self.velocity_initial_size = velocity_scale
         # Example of adjusting units to the world size
         self.wall_thickness_ratio = wall_thickness_ratio  # Wall thickness as a proportion of world size
-        self.ball_diameter_ratio = ball_diameter_ratio  # Ball diameter as a proportion of world size
+        self.ball_radius_ratio = ball_radius_ratio  # Ball radius as a proportion of world size
         
-        self.safe_margin = self.size * self.wall_thickness_ratio  + self.size * ( self.ball_diameter_ratio / 2 ) # The size of the wall + the size of the (radius) if the ball 
+        self.safe_margin = self.size * self.wall_thickness_ratio  + self.size * self.ball_radius_ratio # The size of the wall + the size of the (radius) if the ball 
             
         # Adjust for ball's radius in collision detection
         self.left_bound = 0 + self.safe_margin 
@@ -259,8 +259,8 @@ class BouncingBallEnv(gym.Env):
 
     
         # Convert these ratios to pixel dimensions for rendering
-        ball_diameter_pixels = self.window_size * self.ball_diameter_ratio
-        wall_thickness_pixels = self.window_size * self.wall_thickness_ratio
+        ball_radius_pixels = self.ball_radius_ratio * self.window_size / self.size
+        wall_thickness_pixels = self.wall_thickness_ratio * self.window_size / self.size
 
         # Draw walls as thick lines around the perimeter using the pixel dimensions
         wall_color = (0, 0, 0)  # Black for walls
@@ -277,11 +277,19 @@ class BouncingBallEnv(gym.Env):
         agent_center_y = (agent_location[1] * self.window_size / self.size)
         agent_center = (int(agent_center_x), int(agent_center_y))
         
-        radius = int(ball_diameter_pixels / 2)
+        radius = int(ball_radius_pixels)
         
+        print("==========================")
         print("Radius: ", radius)
         print("Agent center: ", agent_center)
-        pygame.draw.circle(canvas, agent_color, agent_center, int(ball_diameter_pixels / 2))
+        
+        
+        # print("Radius (size): ", radius)
+        # print("Agent center (size): ", (agent_location[0], agent_location[1]))
+        print("==========================")
+        
+        
+        pygame.draw.circle(canvas, agent_color, agent_center, radius)
         
         if self.render_mode == "human":
             # The following line copies our drawings from `canvas` to the visible window
