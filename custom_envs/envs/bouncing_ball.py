@@ -70,7 +70,7 @@ class BouncingBallEnv(gym.Env):
         self.wall_thickness_ratio = wall_thickness_ratio  # Wall thickness as a proportion of world size
         self.ball_diameter_ratio = ball_diameter_ratio  # Ball diameter as a proportion of world size
         
-        self.safe_margin = self.size * self.wall_thickness_ratio  + self.size * self.ball_diameter_ratio # The size of the wall + the size of the (diameter) if the ball 
+        self.safe_margin = self.size * self.wall_thickness_ratio  + self.size * ( self.ball_diameter_ratio / 2 ) # The size of the wall + the size of the (radius) if the ball 
             
         # Adjust for ball's radius in collision detection
         self.left_bound = 0 + self.safe_margin 
@@ -230,6 +230,7 @@ class BouncingBallEnv(gym.Env):
         if self.log:
             if collision:
                 print(f"Collision detected! =====> reward: {reward}")
+            print(f"bottom bound: {self.bottom_bound}, left bound: {self.left_bound}, top bound: {self.top_bound}, right bound: {self.right_bound}")
             print(f"Velocity: {self.state[2:]}, Position: {self.state[:2]}, Energy: {np.linalg.norm(self.state[2:])}")
         return observation, reward, done, info
 
