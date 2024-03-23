@@ -259,15 +259,20 @@ class BouncingBallEnv(gym.Env):
 
     
         # Convert these ratios to pixel dimensions for rendering
-        ball_radius_pixels = self.ball_radius_ratio * self.window_size / self.size
-        wall_thickness_pixels = self.wall_thickness_ratio * self.window_size / self.size
+        ball_radius_pixels = self.ball_radius_ratio * self.window_size
+        wall_thickness_pixels = self.wall_thickness_ratio * self.window_size
 
-        # Draw walls as thick lines around the perimeter using the pixel dimensions
-        wall_color = (0, 0, 0)  # Black for walls
-        pygame.draw.line(canvas, wall_color, (0, 0), (self.window_size, 0), int(wall_thickness_pixels))  # Top wall
-        pygame.draw.line(canvas, wall_color, (0, self.window_size), (self.window_size, self.window_size), int(wall_thickness_pixels))  # Bottom wall
-        pygame.draw.line(canvas, wall_color, (0, 0), (0, self.window_size), int(wall_thickness_pixels))  # Left wall
-        pygame.draw.line(canvas, wall_color, (self.window_size, 0), (self.window_size, self.window_size), int(wall_thickness_pixels))  # Right wall
+        # Draw walls around the perimeter using the pixel dimensions
+        wall_color = (0, 0, 0)
+
+        # Top wall
+        pygame.draw.rect(self.window, wall_color, pygame.Rect(0, 0, self.window_size, wall_thickness_pixels))
+        # Bottom wall
+        pygame.draw.rect(self.window, wall_color, pygame.Rect(0, self.window_size - wall_thickness_pixels, self.window_size, wall_thickness_pixels))
+        # Left wall
+        pygame.draw.rect(self.window, wall_color, pygame.Rect(0, 0, wall_thickness_pixels, self.window_size))
+        # Right wall
+        pygame.draw.rect(self.window, wall_color, pygame.Rect(self.window_size - wall_thickness_pixels, 0, wall_thickness_pixels, self.window_size))
 
         # Draw the agent (ball)
         agent_location = self.state[:2]
@@ -286,6 +291,7 @@ class BouncingBallEnv(gym.Env):
         
         print("Radius (size): ", self.ball_radius_ratio * self.size)
         print("Agent center (size): ", (agent_location[0], agent_location[1]))
+        print("Wall thickness(size): ", self.wall_thickness_ratio * self.size)
         print("==========================")
         
         
