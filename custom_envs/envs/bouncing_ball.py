@@ -185,6 +185,7 @@ class BouncingBallEnv(gym.Env):
         # Here we assume each step has unit time duration. So s = v * t.
         self.state[:2] += self.state[2:]
         next_position = self.state[:2] # The idea next position (unclipped), used for collision detection
+        print(f"next_position: {next_position}")
         # Ensure the ball's position is within the environment bounds
         self.state[:2] = np.clip(self.state[:2], self.left_bound, self.top_bound)
         
