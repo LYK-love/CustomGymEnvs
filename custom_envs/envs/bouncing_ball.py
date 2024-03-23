@@ -34,7 +34,7 @@ class BouncingBallEnv(gym.Env):
     """
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
     
-    def __init__(self, render_mode=None, size=2, ball_diameter_ratio = 0.01, apply_action=True, log=False):
+    def __init__(self, render_mode=None, size=2, velocity_scale = 1.0, ball_diameter_ratio = 0.01, wall_thickness_ratio = 0.01, apply_action=True, log=False):
         """
         Initialize the BouncingBallEnv.
 
@@ -51,9 +51,9 @@ class BouncingBallEnv(gym.Env):
         self.seed()
         
         # Define observation space (ball's position and velocity in 2D)
-        self.observation_space = spaces.Box(low=0, high=size - 1, shape=(2,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=0, high=size, shape=(2,), dtype=np.float32)
         # Define action space (2D continuous: move in any direction)
-        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-velocity_scale, high=velocity_scale, shape=(2,), dtype=np.float32)
         # Initialize state (position of the ball)
         self.state = None
         
@@ -65,24 +65,24 @@ class BouncingBallEnv(gym.Env):
             self.velocity_change_factor = 0 
         
         self.min_velocity = 0.01  # Threshold for considering the velocity to be effectively zero
-        
+        self.velocity_initial_size = velocity_scale
         # Example of adjusting units to the world size
-        self.wall_thickness_ratio = 0.02  # Wall thickness as a proportion of world size
+        self.wall_thickness_ratio = wall_thickness_ratio  # Wall thickness as a proportion of world size
         self.ball_diameter_ratio = ball_diameter_ratio  # Ball diameter as a proportion of world size
 
-        self.wall_thickness_world = self.size * self.wall_thickness_ratio
         self.ball_radius_world = (self.size * self.ball_diameter_ratio) / 2
 
         
+        self.safe_margin = self.size * self.wall_thickness_ratio  # The size of the wall
+            
+        # Adjust for ball's radius in collision detection
+        self.left_bound = 0 + self.safe_margin + self.ball_radius_world
+        self.right_bound = self.size  - self.safe_margin - self.ball_radius_world
+        self.bottom_bound = 0 + self.safe_margin +  self.ball_radius_world
+        self.top_bound = self.size  - self.safe_margin - self.ball_radius_world
+        
+        
         self.log = log
-        # self.keys_to_action = {
-        #     # Direction vectors represented as [x, y]
-        #     "w": [0, -1],  # Up
-        #     "a": [-1, 0],  # Left
-        #     "s": [0, 1],   # Down
-        #     "d": [1, 0],   # Right
-        # }
-
         self.render_mode = render_mode
 
         """
@@ -141,30 +141,22 @@ class BouncingBallEnv(gym.Env):
         Returns:
         - observation (np.ndarray): The initial observation of the environment.
         """
-        # Define the safe area for ball initialization, considering wall thickness
-        wall_thickness_ratio = 0.01
-        safe_margin = self.size * wall_thickness_ratio  # Convert wall thickness to environment scale
         
-        # Define the safe bounds for ball initialization
-        lower_bound = 0 + safe_margin
-        upper_bound = self.size - safe_margin
 
         # Randomly initialize the ball's position within the safe bounds
-        initial_x = self.np_random.uniform(low=lower_bound, high=upper_bound)
-        initial_y = self.np_random.uniform(low=lower_bound, high=upper_bound)
+        initial_x = self.np_random.uniform(low=self.left_bound, high=self.right_bound)
+        initial_y = self.np_random.uniform(low=self.bottom_bound, high=self.top_bound)
         
         # Randomly initialize the ball's velocity
         
-        initial_velocity_x = self.np_random.uniform(low=-1.0, high=1.0)
-        initial_velocity_y = self.np_random.uniform(low=-1.0, high=1.0)
+        initial_velocity_x = self.np_random.uniform(low=-self.velocity_initial_size, high=self.velocity_initial_size)
+        initial_velocity_y = self.np_random.uniform(low=-self.velocity_initial_size, high=self.velocity_initial_size)
 
-        
         # Set the initial state
         self.state = np.array([initial_x, initial_y, initial_velocity_x, initial_velocity_y], dtype=np.float32)
         
         if self.render_mode == "human":
             self._render_frame()
-        # Return the initial observation (ball's position and velocity)
         
         observation = self._get_obs()
         return observation
@@ -203,18 +195,14 @@ class BouncingBallEnv(gym.Env):
         reward = 0
         done = False
 
-        # Adjust for ball's radius in collision detection
-        left_bound = 0 + self.ball_radius_world
-        right_bound = self.size - 1 - self.ball_radius_world
-        top_bound = 0 + self.ball_radius_world
-        bottom_bound = self.size - 1 - self.ball_radius_world
+        
 
         # Check collisions with adjustments for ball radius
         collision = False
-        if next_position[0] <= left_bound or next_position[0] >= right_bound:
+        if next_position[0] <= self.left_bound or next_position[0] >= self.right_bound:
             self.state[2] = -self.state[2] * energy_loss_factor  # Reverse X velocity
             collision = True
-        if next_position[1] <= top_bound or next_position[1] >= bottom_bound:
+        if next_position[1] <= self.bottom_bound or next_position[1] >= self.top_bound:
             self.state[3] = -self.state[3] * energy_loss_factor  # Reverse Y velocity
             collision = True
 
@@ -226,7 +214,7 @@ class BouncingBallEnv(gym.Env):
         self.state[:2] += self.state[2:]
 
         # Ensure the ball's position is within the environment bounds
-        self.state[:2] = np.clip(self.state[:2], 0, self.size - 1)
+        self.state[:2] = np.clip(self.state[:2], 0, self.size)
 
         # Check if the ball's velocity is effectively zero
         if np.linalg.norm(self.state[2:]) < min_velocity:
@@ -249,44 +237,6 @@ class BouncingBallEnv(gym.Env):
             print(f"Velocity: {self.state[2:]}, Position: {self.state[:2]}, Energy: {np.linalg.norm(self.state[2:])}")
         return observation, reward, done, info
 
-    def old_step(self, action):
-        '''
-        Use action. Not use velocity.
-        '''
-        # The `step()` method must return four values: obs, reward, done, info
-        
-        # Normalize the action to get the direction vector with magnitude 1
-        direction = action / np.linalg.norm(action)
-        next_position = self.state[:2] + direction  # Update position based on the direction
-
-    
-        # Initialize variables
-        reward = 0
-        done = False
-
-        # Check for wall collisions and adjust the position if necessary
-        if np.any(next_position <= 0) or np.any(next_position >= self.size - 1):
-            # Collision detected: Bounce back by reversing the direction
-            # Note: This simple model assumes a perfect elastic collision without energy loss
-            inverse_direction = -direction
-            # Ensure the ball stays within bounds after the bounce
-            # The ball moves back 1 unit in the inverse direction after collision
-            self.state[:2] = np.clip(self.state[:2] + inverse_direction, 0, self.size - 1)
-            reward = 1  # Assign reward for hitting and bouncing off the wall
-            print(f"Collision! ======> reward: {reward}")
-        else:
-            # No collision: Update position normally
-            self.state[:2] = np.clip(next_position, 0, self.size - 1)
-            
-
-        # Assuming 'done' remains False unless a specific termination condition is met
-        observation = self._get_obs()
-        info = self._get_info()  # Add any additional info if necessary
-
-        if self.render_mode == "human":
-            self._render_frame()
-            
-        return observation, reward, done, info
     
     def render(self, mode="human"):
         if self.render_mode == "rgb_array":
