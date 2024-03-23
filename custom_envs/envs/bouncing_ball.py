@@ -34,7 +34,7 @@ class BouncingBallEnv(gym.Env):
     """
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
     
-    def __init__(self, render_mode=None, size=2, ball_diameter_ratio = 0.01, apply_action=True, log=False):
+    def __init__(self, render_mode=None, size=2, seed=None, energy_loss_factor=0.9, ball_diameter_ratio = 0.01, apply_action=True, log=False):
         """
         Initialize the BouncingBallEnv.
 
@@ -57,7 +57,7 @@ class BouncingBallEnv(gym.Env):
         # Initialize state (position of the ball)
         self.state = None
         
-        self.energy_loss_factor = 0.9  # Control how much energy is lost on collision
+        self.energy_loss_factor = energy_loss_factor  # Control how much energy is lost on collision
 
         if apply_action:
             self.velocity_change_factor = 0.1 # Control how much the action affects the velocity
@@ -233,7 +233,7 @@ class BouncingBallEnv(gym.Env):
             done = True  # End the episode if the ball has stopped moving
         
         # Update the observation with the current state
-        observation = self.state
+        observation = self._get_obs()
 
         info = {
             "message": "Ball has stopped" if done else "In motion",
@@ -288,7 +288,7 @@ class BouncingBallEnv(gym.Env):
             
         return observation, reward, done, info
     
-    def render(self, mode="human"):
+    def render(self):
         if self.render_mode == "rgb_array":
             return self._render_frame()
 
