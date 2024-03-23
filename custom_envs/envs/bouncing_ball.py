@@ -204,6 +204,9 @@ class BouncingBallEnv(gym.Env):
         
         # Check collisions with adjustments for ball radius
         collision = False
+        print(f"next_position[0]={next_position[0]}, self.left_bound={self.left_bound}, self.right_bound={self.right_bound}")
+        print(f"next_position[1]={next_position[1]}, self.bottom_bound={self.bottom_bound}, self.top_bound={self.top_bound}")
+        
         if next_position[0] <= self.left_bound or next_position[0] >= self.right_bound:
             next_velocity[0] = -next_velocity[0] * self.energy_loss_factor  # Reverse X velocity
             collision = True
