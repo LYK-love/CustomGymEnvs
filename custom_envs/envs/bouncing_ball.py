@@ -179,12 +179,13 @@ class BouncingBallEnv(gym.Env):
         if next_position[1] <= self.bottom_bound or next_position[1] >= self.top_bound:
             self.state[3] = -self.state[3] * self.energy_loss_factor  # Reverse Y velocity
             collision = True
-
+        if collision:
+            reward = 10
         
         if self.log:
             print(f"New velocity: {self.state[2:]}\nNew position: {self.state[:2]}\nNew energy: {np.linalg.norm(self.state[2:])}")
+              # Reward for hitting a wall
             if collision:
-                reward = 10  # Reward for hitting a wall
                 print(f"Collision detected!")
                 print(f"=====> reward: {reward}")
             else:
@@ -198,8 +199,11 @@ class BouncingBallEnv(gym.Env):
         observation = self._get_obs()
 
         info = {
-            "message": "Ball has stopped" if done else "In motion",
-            "Energy": {np.linalg.norm(self.state[2:])}
+            # "message": "Ball has stopped" if done else "In motion",
+            "New velocity": self.state[2:],
+            "New position": self.state[:2],
+            "New energy": np.linalg.norm(self.state[2:]),
+            "reward": reward,      
             }
 
         if self.render_mode == "human":
