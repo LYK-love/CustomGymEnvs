@@ -215,7 +215,9 @@ class BouncingBallEnv(gym.Env):
 
         if collision:
             reward = 10  # Reward for hitting a wall
-            print(f"Collision detected! =====> reward: {reward}")
+            print(f"Collision detected!")
+            print(f"Now position is (should be near the wall): {self.state[:2]}")
+            print(f"=====> reward: {reward}")
         else:
             print("No collision detected")
 
