@@ -217,7 +217,7 @@ class BouncingBallEnv(gym.Env):
             reward = 10  # Reward for hitting a wall
             print(f"Collision detected!")
             print(f"Now position is (should be near the wall): {self.state[:2]}")
-            print(f"=====> reward: {reward}")
+            print(f"=====> reward: {reward}")s
         else:
             print("No collision detected")
 
@@ -281,7 +281,7 @@ class BouncingBallEnv(gym.Env):
         agent_center_x = (agent_location[0] * self.window_size / self.size)
         agent_center_y = (agent_location[1] * self.window_size / self.size)
         agent_center = (int(agent_center_x), int(agent_center_y))
-        pygame.draw.circle(canvas, agent_color, agent_center, int(ball_diameter_pixels // 2))
+        pygame.draw.circle(canvas, agent_color, agent_center, int(ball_diameter_pixels / 2))
         
         if self.render_mode == "human":
             # The following line copies our drawings from `canvas` to the visible window
