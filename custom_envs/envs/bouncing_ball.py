@@ -12,7 +12,7 @@ class BouncingBallEnv(gym.Env):
     
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
     
-    def __init__(self, render_mode=None, size=2, velocity_scale = 1.0, ball_radius_ratio = 0.005, wall_thickness_ratio = 0.01, energy_loss_factor=0.9, apply_action=True, log=False):
+    def __init__(self, render_mode=None, size=2, velocity_scale = 1.0, ball_radius_ratio = 0.05, wall_thickness_ratio = 0.01, energy_loss_factor=0.9, apply_action=True, log=False):
         """
         Initialize the BouncingBallEnv.
 
