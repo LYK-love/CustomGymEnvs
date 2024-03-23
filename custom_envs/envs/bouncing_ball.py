@@ -208,7 +208,7 @@ class BouncingBallEnv(gym.Env):
             self.state[3] = -self.state[3] * self.energy_loss_factor  # Reverse Y velocity
             collision = True
 
-        print(f"New velocity: {self.state[2:]} \n New position: {self.state[:2]} \n New energy: {np.linalg.norm(self.state[2:])}")
+        print(f"New velocity: {self.state[2:]}\nNew position: {self.state[:2]}\nNew energy: {np.linalg.norm(self.state[2:])}")
         
         if self.log:
             if collision:
@@ -276,6 +276,11 @@ class BouncingBallEnv(gym.Env):
         agent_center_x = (agent_location[0] * self.window_size / self.size)
         agent_center_y = (agent_location[1] * self.window_size / self.size)
         agent_center = (int(agent_center_x), int(agent_center_y))
+        
+        radius = int(ball_diameter_pixels / 2)
+        
+        print("Radius: ", radius)
+        print("Agent center: ", agent_center)
         pygame.draw.circle(canvas, agent_color, agent_center, int(ball_diameter_pixels / 2))
         
         if self.render_mode == "human":
