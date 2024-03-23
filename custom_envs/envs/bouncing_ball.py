@@ -69,17 +69,14 @@ class BouncingBallEnv(gym.Env):
         # Example of adjusting units to the world size
         self.wall_thickness_ratio = wall_thickness_ratio  # Wall thickness as a proportion of world size
         self.ball_diameter_ratio = ball_diameter_ratio  # Ball diameter as a proportion of world size
-
-        self.ball_radius_world = (self.size * self.ball_diameter_ratio) / 2
-
         
-        self.safe_margin = self.size * self.wall_thickness_ratio  # The size of the wall
+        self.safe_margin = self.size * self.wall_thickness_ratio  + self.size * self.ball_diameter_ratio # The size of the wall + the size of the (diameter) if the ball 
             
         # Adjust for ball's radius in collision detection
-        self.left_bound = 0 + self.safe_margin + self.ball_radius_world
-        self.right_bound = self.size  - self.safe_margin - self.ball_radius_world
-        self.bottom_bound = 0 + self.safe_margin +  self.ball_radius_world
-        self.top_bound = self.size  - self.safe_margin - self.ball_radius_world
+        self.left_bound = 0 + self.safe_margin 
+        self.right_bound = self.size  - self.safe_margin
+        self.bottom_bound = 0 + self.safe_margin
+        self.top_bound = self.size  - self.safe_margin
         
         
         self.log = log
@@ -175,17 +172,12 @@ class BouncingBallEnv(gym.Env):
         - done (bool): Whether the episode is done or not.
         - info (dict): Additional information about the environment.
         """
-        ## Constants for modifications
-        velocity_change_factor = self.velocity_change_factor  # Control how much the action affects the velocity
-        energy_loss_factor = self.energy_loss_factor  # Control how much energy is lost on collision
-        min_velocity = self.min_velocity  # Threshold for considering the velocity to be effectively zero
-        
         # Normalize the action to ensure it's a unit vector
         action_direction = action / np.linalg.norm(action)
         
         # Adjust the ball's velocity based on the action
-        self.state[2] += action_direction[0] * velocity_change_factor
-        self.state[3] += action_direction[1] * velocity_change_factor
+        self.state[2] += action_direction[0] * self.velocity_change_factor
+        self.state[3] += action_direction[1] * self.velocity_change_factor
         
         
         # Update the ball's position based on its velocity
@@ -200,10 +192,10 @@ class BouncingBallEnv(gym.Env):
         # Check collisions with adjustments for ball radius
         collision = False
         if next_position[0] <= self.left_bound or next_position[0] >= self.right_bound:
-            self.state[2] = -self.state[2] * energy_loss_factor  # Reverse X velocity
+            self.state[2] = -self.state[2] * self.energy_loss_factor  # Reverse X velocity
             collision = True
         if next_position[1] <= self.bottom_bound or next_position[1] >= self.top_bound:
-            self.state[3] = -self.state[3] * energy_loss_factor  # Reverse Y velocity
+            self.state[3] = -self.state[3] * self.energy_loss_factor  # Reverse Y velocity
             collision = True
 
         if collision:
@@ -217,7 +209,7 @@ class BouncingBallEnv(gym.Env):
         self.state[:2] = np.clip(self.state[:2], 0, self.size)
 
         # Check if the ball's velocity is effectively zero
-        if np.linalg.norm(self.state[2:]) < min_velocity:
+        if np.linalg.norm(self.state[2:]) < self.min_velocity:
             done = True  # End the episode if the ball has stopped moving
         
         # Update the observation with the current state
@@ -255,13 +247,10 @@ class BouncingBallEnv(gym.Env):
         canvas = pygame.Surface((self.window_size, self.window_size))
         canvas.fill((255, 255, 255))  # White background
 
-        # Assuming you've calculated these ratios based on the environment's scale
-        ball_diameter_ratio = self.ball_diameter_ratio  # The ball's diameter as a proportion of the environment size
-        wall_thickness_ratio = self.wall_thickness_ratio  # The wall's thickness as a proportion of the environment size
-
+    
         # Convert these ratios to pixel dimensions for rendering
-        ball_diameter_pixels = self.window_size * ball_diameter_ratio
-        wall_thickness_pixels = self.window_size * wall_thickness_ratio
+        ball_diameter_pixels = self.window_size * self.ball_diameter_ratio
+        wall_thickness_pixels = self.window_size * self.wall_thickness_ratio
 
         # Draw walls as thick lines around the perimeter using the pixel dimensions
         wall_color = (0, 0, 0)  # Black for walls
