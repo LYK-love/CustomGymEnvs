@@ -189,13 +189,12 @@ class BouncingBallEnv(gym.Env):
         # Apply old velocity to calculate the new position
         # Here we assume each step has unit time duration. So s = v * t.
         self.state[:2] += self.state[2:]
-        next_position = self.state[:2] # The idea next position (unclipped), used for collision detection
+        next_position = (self.state[:2]).copy() # The idea next position (unclipped), used for collision detection
         print(f"next_position: {next_position}")
         
         # Ensure the ball's position is within the environment bounds
         self.state[:2] = np.clip(self.state[:2], self.left_bound, self.top_bound)
         
-        next_velocity = self.state[2:]
 
         # Initialize reward and done flag
         reward = 0
@@ -208,10 +207,10 @@ class BouncingBallEnv(gym.Env):
         print(f"next_position[1]={next_position[1]}, self.bottom_bound={self.bottom_bound}, self.top_bound={self.top_bound}")
         
         if next_position[0] <= self.left_bound or next_position[0] >= self.right_bound:
-            next_velocity[0] = -next_velocity[0] * self.energy_loss_factor  # Reverse X velocity
+            self.state[2] = -self.state[2] * self.energy_loss_factor  # Reverse X velocity
             collision = True
         if next_position[1] <= self.bottom_bound or next_position[1] >= self.top_bound:
-            next_velocity[1] = -next_velocity[1] * self.energy_loss_factor  # Reverse Y velocity
+            self.state[3] = -self.state[3] * self.energy_loss_factor  # Reverse Y velocity
             collision = True
 
         if collision:
@@ -220,9 +219,6 @@ class BouncingBallEnv(gym.Env):
         else:
             print("No collision detected")
 
-        # Update the velocity
-        self.state[2] = next_velocity[0]
-        self.state[3] = next_velocity[1]
         
         
         # Check if the ball's velocity is effectively zero
