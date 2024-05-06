@@ -1,3 +1,5 @@
 Metadata-Version: 2.1
-Name: custom-envs
-Version: 0.0.1
+Name: custom_envs
+Version: 0.0.2
+Requires-Dist: gym==0.19.0
+Requires-Dist: pygame==2.1.0
